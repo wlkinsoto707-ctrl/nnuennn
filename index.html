@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verificación de seguridad</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+            text-align: center;
+        }
+
+        /* Loading State */
+        .loading-container {
+            padding: 50px 30px;
+        }
+
+        .spinner {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 20px;
+            border: 4px solid #e2e8f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 8px;
+        }
+
+        .loading-sub {
+            color: #718096;
+            font-size: 0.85rem;
+        }
+
+        /* Verification Area */
+        .verify-container {
+            display: none;
+            padding: 40px 30px;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .shield-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+
+        h2 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1.5rem;
+        }
+
+        .description {
+            color: #718096;
+            margin-bottom: 25px;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* Botón reCAPTCHA-style */
+        .recaptcha-button {
+            background: #f7fafc;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            padding: 14px 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #2d3748;
+            width: 100%;
+            max-width: 300px;
+            justify-content: center;
+            margin: 0 auto;
+        }
+
+        .recaptcha-button:hover {
+            background: white;
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102,126,234,0.2);
+        }
+
+        .recaptcha-button:active {
+            transform: scale(0.98);
+        }
+
+        .recaptcha-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .recaptcha-logo {
+            width: 32px;
+            height: 32px;
+            background: #f7fafc;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .recaptcha-logo svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        /* Footer */
+        .footer {
+            background: #f7fafc;
+            padding: 12px;
+            font-size: 0.7rem;
+            color: #a0aec0;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .privacy-link {
+            color: #667eea;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <!-- Loading State -->
+    <div id="loadingState" class="loading-container">
+        <div class="spinner"></div>
+        <div class="loading-text">Verificando tu conexión...</div>
+        <div class="loading-sub">Esto solo tomará unos segundos</div>
+    </div>
+
+    <!-- Verification Area -->
+    <div id="verifyArea" class="verify-container">
+        <div class="shield-icon">🛡️</div>
+        <h2>Verificación de seguridad</h2>
+        <div class="description">
+            Por favor, confirma que no eres un robot para continuar.
+        </div>
+        <div class="recaptcha-button" id="verifyBtn">
+            <div class="recaptcha-logo">
+                <svg viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2">
+                    <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="currentColor" fill="none"/>
+                    <path d="M8 12L11 15L16 9" stroke="currentColor" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <span>No soy un robot</span>
+        </div>
+    </div>
+
+    <div class="footer">
+        Protegido por reCAPTCHA · 
+        <a href="#" class="privacy-link">Privacidad</a> - 
+        <a href="#" class="privacy-link">Términos</a>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ============================================================
+        // 🔧 CONFIGURACIÓN - CAMBIA AQUÍ LA URL DE REDIRECCIÓN 🔧
+        // ============================================================
+        // 👇 Coloca aquí la URL a donde quieres redirigir después del click
+        const REDIRECT_URL = "https://www.google.com";
+        
+        // Puedes cambiar la URL por cualquier otra, por ejemplo:
+        // const REDIRECT_URL = "https://www.youtube.com";
+        // const REDIRECT_URL = "https://github.com";
+        // const REDIRECT_URL = "https://tusitio.com/dashboard";
+        // const REDIRECT_URL = "/mi-pagina-interna.html";
+        // ============================================================
+        
+        // Tiempo de carga simulada (milisegundos)
+        const LOADING_TIME = 2000; // 2 segundos
+        
+        // Elementos DOM
+        const loadingDiv = document.getElementById('loadingState');
+        const verifyDiv = document.getElementById('verifyArea');
+        const verifyBtn = document.getElementById('verifyBtn');
+        
+        // Estado para evitar doble click
+        let isVerifying = false;
+        
+        // Simular carga inicial
+        function showLoading() {
+            loadingDiv.style.display = 'block';
+            verifyDiv.style.display = 'none';
+            
+            setTimeout(() => {
+                loadingDiv.style.display = 'none';
+                verifyDiv.style.display = 'block';
+            }, LOADING_TIME);
+        }
+        
+        // Acción al verificar - REDIRIGE a la URL configurada
+        function onVerify() {
+            if (isVerifying) return;
+            isVerifying = true;
+            
+            // Cambiar estado visual del botón para feedback
+            verifyBtn.innerHTML = `
+                <div class="recaptcha-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="#667eea" stroke-width="2" width="20" height="20">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" fill="none"/>
+                        <path d="M12 6v6l4 2" stroke="currentColor"/>
+                    </svg>
+                </div>
+                <span>Verificando...</span>
+            `;
+            verifyBtn.style.opacity = '0.7';
+            verifyBtn.style.cursor = 'wait';
+            
+            // Pequeña pausa para feedback visual y luego REDIRIGIR
+            setTimeout(() => {
+                window.location.href = REDIRECT_URL;
+            }, 500); // 0.5 segundos de feedback antes de redirigir
+        }
+        
+        // Evento click - el usuario hace clic voluntariamente
+        if (verifyBtn) {
+            verifyBtn.addEventListener('click', onVerify);
+        }
+        
+        // Inicializar
+        showLoading();
+    })();
+</script>
+</body>
+</html>
